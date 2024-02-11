@@ -18,12 +18,13 @@ const handleUserLogin = async (req,res) => {
     const {email,password} = req.body;
     const user = await User.findOne({email,password});
     if(!user)
-    return res.redirect('/signup');
+    return res.redirect('/login');
 
     // const sessionId = uuid();
     const token = setUser(user);
-    res.cookie("uuid",token);
-    return res.redirect("/");
+    return res.json({token});
+    // res.cookie("uuid",token);
+    // return res.redirect("/");
 }
 
 module.exports = {handleUserSignUp,handleUserLogin}
