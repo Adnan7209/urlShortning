@@ -20,9 +20,9 @@ const handleUserLogin = async (req,res) => {
     if(!user)
     return res.redirect('/signup');
 
-    const sessionId = uuid();
-    setUser(sessionId,user);
-    res.cookie("uuid",sessionId);
+    // const sessionId = uuid();
+    const token = setUser(user);
+    res.cookie("uuid",token);
     return res.redirect("/");
 }
 
