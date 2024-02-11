@@ -1,12 +1,12 @@
 const express = require("express");
 const path = require("path");
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 const { connectToMongoDb } = require("./connect");
-const {restrictToLoggedInUserOnly,checkAuth} = require("./middlewares/auth");
+const { checkForAuthentication, restrictTo } = require("./middlewares/auth");
 
 const urlRoute = require("./routes/url");
 const staticRoute = require("./routes/staticRouter");
-const  userRoute = require('./routes/user');
+const userRoute = require("./routes/user");
 const URL = require("./models/url");
 
 const app = express();
@@ -16,12 +16,13 @@ connectToMongoDb("mongodb://127.0.0.1:27017/short-url")
   .then(() => console.log("mongodb connected"))
   .catch((err) => console.log("mongo error ", err));
 
-  app.set("view engine","ejs");
-  app.set('views',path.resolve("./views"));
+app.set("view engine", "ejs");
+app.set("views", path.resolve("./views"));
 
 app.use(express.json());
-app.use(express.urlencoded({extended:false}));
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(checkForAuthentication);
 
 /* app.get("/test",async(req,res)=>{
   const allUrls = await URL.find({});
@@ -30,9 +31,9 @@ app.use(cookieParser());
   });
 }); */
 
-app.use("/url",restrictToLoggedInUserOnly, urlRoute);
-app.use('/user',userRoute);
-app.use("/",checkAuth,staticRoute);
+app.use("/url", restrictTo(["NORMAL", "ADMIN"]), urlRoute);
+app.use("/user", userRoute);
+app.use("/", staticRoute);
 
 app.get("/url/:shortId", async (req, res) => {
   const shortId = req.params.shortId;
